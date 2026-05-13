@@ -551,7 +551,10 @@ export class ReasoningHandler {
         setDatasetProperty(this.messageReasoningDetailsDom, 'type', this.type);
 
         // Update the reasoning message
-        const reasoning = trimSpaces(this.reasoningDisplayText ?? this.reasoning);
+        const rawReasoning = this.reasoningDisplayText ?? this.reasoning;
+        const hasReasoningContent = Boolean(this.reasoningDisplayText || this.reasoning);
+        setDatasetProperty(this.messageReasoningDetailsDom, 'hasContent', hasReasoningContent ? 'true' : null);
+        const reasoning = trimSpaces(rawReasoning);
         const displayReasoning = messageFormatting(reasoning, '', false, false, messageId, {}, true);
 
         if (power_user.stream_fade_in) {
@@ -1198,8 +1201,8 @@ function setReasoningEventHandlers() {
 
     $(document).on('click', '.mes_reasoning_header', function (e) {
         const details = $(this).closest('.mes_reasoning_details');
-        // Along with the CSS rules to mark blocks not toggle-able when they are empty, prevent them from actually being toggled, or being edited
-        if (details.find('.mes_reasoning').is(':empty')) {
+        // Keep click behavior aligned with CSS: only blocks with backing content can toggle or enter edit mode.
+        if (details.attr('data-has-content') !== 'true') {
             e.preventDefault();
             return;
         }
